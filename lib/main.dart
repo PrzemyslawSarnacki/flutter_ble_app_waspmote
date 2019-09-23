@@ -162,7 +162,7 @@ class DeviceScreen extends StatelessWidget {
   static bool switchDataSet = false;
   final int sizeOfArray = 10;
   static var tempValue;
-  static var typeM = "T";
+  static var typeM;
 
   List<double> setDataSet(List<double> currentDataSet,
       List<double> previousDataSet, double newData) {
@@ -330,9 +330,6 @@ class DeviceScreen extends StatelessWidget {
 
             var currentValue = _dataParser(snapshot.data);
 //            var tempValue;
-            if (currentValue.startsWith('T') == true){
-              tempValue = currentValue;
-            }
             print(currentValue);
             print(tempValue);
             _getNewDataSet(currentValue);
