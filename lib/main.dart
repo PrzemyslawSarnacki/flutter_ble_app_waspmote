@@ -198,6 +198,47 @@ class DeviceScreen extends StatelessWidget {
     return utf8.decode(dataFromDevice);
   }
 
+  Widget _tickMeasurement(){
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text("Wowowo"),
+          Material(
+            // needed
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => null, // needed
+              child: Image.asset(
+                "images/humidity.png",
+                width: 40,
+                color: Colors.red,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Material(
+            // needed
+            color: Colors.transparent,
+
+            child: InkWell(
+              onTap: () => null, // needed
+              child: Image.asset(
+                "images/temperature.png",
+                width: 40,
+                color: Colors.red,
+                fit: BoxFit.cover,
+              ),
+            ),
+          )
+
+        ],
+      ),
+    );
+
+
+  }
+
   Widget _myService(List<BluetoothService> services){
     Stream<List<int>> stream;
 
@@ -236,14 +277,7 @@ class DeviceScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Center(
-                    child: Row(
-                      children: <Widget>[
-                        IconButton(icon: Image.asset('/images/temperature.png'), onPressed: null, iconSize: 24),
-                        IconButton(icon: Image.asset('/images/humidity.png'), onPressed: null, iconSize: 24),
-                      ],
-                    ),
-                  ),
+                  _tickMeasurement(),
                   SizedBox(height: 50),
                   new Container(
                     width: 300.0,
@@ -282,7 +316,15 @@ class DeviceScreen extends StatelessWidget {
             );
 
           } else {
-            return Text('Check the stream');
+            return Center(child: Column(
+              children: <Widget>[
+                _tickMeasurement(),
+                Text('Check the stream')
+              ],
+            ),
+
+            )
+          ;
           }
         }),
     );
