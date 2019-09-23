@@ -1,6 +1,6 @@
 # flutter_ble_app
 
-A new Flutter application.
+Simple Flutter App that allows you to monitor changes in temperature, humidity, pressure or battery level received from Waspmote Device. Based on Flutter Blue example
 
 ## Getting Started
 
