@@ -162,6 +162,7 @@ class DeviceScreen extends StatelessWidget {
   static bool switchDataSet = false;
   final int sizeOfArray = 10;
   static var tempValue;
+  static var typeM = "T";
 
   List<double> setDataSet(List<double> currentDataSet,
       List<double> previousDataSet, double newData) {
@@ -179,19 +180,69 @@ class DeviceScreen extends StatelessWidget {
   _getNewDataSet(String data) {
     if (data.isEmpty) return;
     
-    if (data.startsWith('T') == true) {
-      data = data.substring(12,18);
-      print(data);
-      var temp = double.parse(data);
-      assert(temp is double);
+    if (typeM == "T") {
+      if (data.startsWith('T') == true) {
+        tempValue = data;
+        data = data.substring(12,18);
+        print(data);
+        var temp = double.parse(data);
+        assert(temp is double);
 
-      if (switchDataSet) {
-        baseData = setDataSet(dataSetB, dataSetA, temp);
-      } else {
-        baseData = setDataSet(dataSetA, dataSetB, temp);
+        if (switchDataSet) {
+          baseData = setDataSet(dataSetB, dataSetA, temp);
+        } else {
+          baseData = setDataSet(dataSetA, dataSetB, temp);
+        }
+        switchDataSet = !switchDataSet;
       }
-      switchDataSet = !switchDataSet;
     }
+    else if (typeM == "B"){
+      if (data.startsWith('B') == true) {
+        tempValue = data;
+        data = data.substring(8,14);
+        print(data);
+        var temp = double.parse(data);
+        assert(temp is double);
+
+        if (switchDataSet) {
+          baseData = setDataSet(dataSetB, dataSetA, temp);
+        } else {
+          baseData = setDataSet(dataSetA, dataSetB, temp);
+        }
+        switchDataSet = !switchDataSet;
+      }
+    } else if (typeM == "P"){
+      if (data.startsWith('P') == true) {
+        tempValue = data;
+        data = data.substring(6,15);
+        print(data);
+        var temp = double.parse(data);
+        assert(temp is double);
+
+        if (switchDataSet) {
+          baseData = setDataSet(dataSetB, dataSetA, temp);
+        } else {
+          baseData = setDataSet(dataSetA, dataSetB, temp);
+        }
+        switchDataSet = !switchDataSet;
+      }
+    } else if (typeM == "H"){
+      if (data.startsWith('W') == true) {
+        tempValue = data;
+        data = data.substring(11,17);
+        print(data);
+        var temp = double.parse(data);
+        assert(temp is double);
+
+        if (switchDataSet) {
+          baseData = setDataSet(dataSetB, dataSetA, temp);
+        } else {
+          baseData = setDataSet(dataSetA, dataSetB, temp);
+        }
+        switchDataSet = !switchDataSet;
+      }
+    }
+
   }
 
   String _dataParser(List<int> dataFromDevice) {
@@ -206,7 +257,7 @@ class DeviceScreen extends StatelessWidget {
           Material(// needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => null, // needed
+              onTap: () => typeM = "T", // needed
               child: Image.asset(
                 "images/humidity.png",
                 width: 40,
@@ -218,7 +269,7 @@ class DeviceScreen extends StatelessWidget {
           Material(// needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => null, // needed
+              onTap: () => typeM = "P", // needed
               child: Icon(
                 Icons.arrow_drop_down_circle,
                 size: 40,
@@ -229,7 +280,7 @@ class DeviceScreen extends StatelessWidget {
           Material(// needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => null, // needed
+              onTap: () => typeM = "B", // needed
               child: Icon(
                 Icons.battery_alert,
                 size: 40,
@@ -240,7 +291,7 @@ class DeviceScreen extends StatelessWidget {
           Material(// needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => null, // needed
+              onTap: () => typeM = "H", // needed
               child: Image.asset(
                 "images/temperature.png",
                 width: 40,
@@ -281,9 +332,6 @@ class DeviceScreen extends StatelessWidget {
 //            var tempValue;
             if (currentValue.startsWith('T') == true){
               tempValue = currentValue;
-            }
-            else {
-              tempValue = tempValue;
             }
             print(currentValue);
             print(tempValue);
