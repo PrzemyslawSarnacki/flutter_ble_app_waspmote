@@ -203,9 +203,7 @@ class DeviceScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text("Wowowo"),
-          Material(
-            // needed
+          Material(// needed
             color: Colors.transparent,
             child: InkWell(
               onTap: () => null, // needed
@@ -217,10 +215,30 @@ class DeviceScreen extends StatelessWidget {
               ),
             ),
           ),
-          Material(
-            // needed
+          Material(// needed
             color: Colors.transparent,
-
+            child: InkWell(
+              onTap: () => null, // needed
+              child: Icon(
+                Icons.arrow_drop_down_circle,
+                size: 40,
+                color: Colors.red,
+              ),
+            ),
+          ),
+          Material(// needed
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => null, // needed
+              child: Icon(
+                Icons.battery_alert,
+                size: 40,
+                color: Colors.red,
+              ),
+            ),
+          ),
+          Material(// needed
+            color: Colors.transparent,
             child: InkWell(
               onTap: () => null, // needed
               child: Image.asset(
@@ -231,7 +249,6 @@ class DeviceScreen extends StatelessWidget {
               ),
             ),
           )
-
         ],
       ),
     );
