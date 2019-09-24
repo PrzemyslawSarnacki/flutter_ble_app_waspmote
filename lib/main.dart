@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_ble_app/widgets.dart';
 import 'package:flutter_sparkline/flutter_sparkline.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(FlutterBlueApp());
@@ -159,6 +161,7 @@ class DeviceScreen extends StatelessWidget {
   static List<double> baseData = [0, 0];
   static List<double> dataSetA = <double>[];
   static List<double> dataSetB = <double>[];
+  static Set<String> _saved = Set<String>();   // Add this line.
   static bool switchDataSet = false;
   final int sizeOfArray = 10;
   static var tempValue;
@@ -245,11 +248,16 @@ class DeviceScreen extends StatelessWidget {
 
   }
 
+  addStringToSF(String sfString) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('stringValue', sfString);
+  }
+
   String _dataParser(List<int> dataFromDevice) {
     return utf8.decode(dataFromDevice);
   }
 
-  Widget _tickMeasurement(){
+  Widget _tickMeasurement(BuildContext context){
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -261,7 +269,7 @@ class DeviceScreen extends StatelessWidget {
               child: Image.asset(
                 "images/humidity.png",
                 width: 40,
-                color: Colors.red,
+                color: Colors.black26,
                 fit: BoxFit.cover,
               ),
             ),
@@ -273,7 +281,7 @@ class DeviceScreen extends StatelessWidget {
               child: Icon(
                 Icons.arrow_drop_down_circle,
                 size: 40,
-                color: Colors.red,
+                color: Colors.black26,
               ),
             ),
           ),
@@ -284,7 +292,7 @@ class DeviceScreen extends StatelessWidget {
               child: Icon(
                 Icons.battery_alert,
                 size: 40,
-                color: Colors.red,
+                color: Colors.black26,
               ),
             ),
           ),
@@ -295,8 +303,19 @@ class DeviceScreen extends StatelessWidget {
               child: Image.asset(
                 "images/temperature.png",
                 width: 40,
-                color: Colors.red,
+                color: Colors.black26,
                 fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Material(// needed
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _pushSaved(context), // needed
+              child: Icon(
+                Icons.list,
+                size: 40,
+                color: Colors.black26,
               ),
             ),
           )
@@ -331,6 +350,8 @@ class DeviceScreen extends StatelessWidget {
             var currentValue = _dataParser(snapshot.data);
 //            var tempValue;
             print(currentValue);
+            _saved.add("$currentValue ${DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now()).toString()}");
+//            addStringToSF(currentValue);
             print(tempValue);
             _getNewDataSet(currentValue);
 
@@ -339,7 +360,7 @@ class DeviceScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  _tickMeasurement(),
+                  _tickMeasurement(context),
                   SizedBox(height: 50),
                   new Container(
                     width: 300.0,
@@ -380,7 +401,7 @@ class DeviceScreen extends StatelessWidget {
           } else {
             return Center(child: Column(
               children: <Widget>[
-                _tickMeasurement(),
+                _tickMeasurement(context),
                 Text('Check the stream')
               ],
             ),
@@ -419,15 +440,20 @@ class DeviceScreen extends StatelessWidget {
                   text = snapshot.data.toString().substring(21).toUpperCase();
                   break;
               }
-              return FlatButton(
-                  onPressed: onPressed,
-                  child: Text(
-                    text,
-                    style: Theme.of(context)
-                        .primaryTextTheme
-                        .button
-                        .copyWith(color: Colors.white),
-                  ));
+              return Row(
+                children: <Widget>[
+                  FlatButton(
+                      onPressed: onPressed,
+                      child: Text(
+                        text,
+                        style: Theme.of(context)
+                            .primaryTextTheme
+                            .button
+                            .copyWith(color: Colors.white),
+                      ),
+                  )
+                ],
+              );
             },
           )
         ],
@@ -494,7 +520,154 @@ class DeviceScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _pushSaved(BuildContext context){
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          final Iterable<ListTile> tiles = _saved.map(
+                (String pair) {
+              return ListTile(
+                title: Text(
+                  pair,
+                  style: TextStyle(fontWeight: FontWeight.w300, fontSize: 12,),
+                ),
+              );
+            },
+          );
+          final List<Widget> divided = ListTile
+              .divideTiles(
+            context: context,
+            tiles: tiles,
+          )
+              .toList();
+
+          return Scaffold(         // Add 6 lines from here...
+            appBar: AppBar(
+              title: Text('Saved Data'),
+            ),
+            body: ListView(children: divided),
+          );                       // ... to here.
+        },
+      ),
+    );
+
+
+
+  }
 }
+
+class AnimatedListExample extends StatefulWidget {
+  @override
+  AnimatedListExampleState createState() {
+    return new AnimatedListExampleState();
+  }
+}
+
+class AnimatedListExampleState extends State<AnimatedListExample> {
+
+  static const String CHARACTERISTIC_UUID = "be39a5dc-048b-4b8f-84cb-94c197edd26e";
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey();
+
+
+  List<String> _data = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Animated List'),
+        backgroundColor: Colors.blueAccent,
+      ),
+      persistentFooterButtons: <Widget>[
+        RaisedButton(
+          child: Text(
+            'Add an item',
+            style: TextStyle(fontSize: 20, color: Colors.white),
+          ),
+          onPressed: () {
+            _addAnItem();
+          },
+        ),
+        RaisedButton(
+          child: Text(
+            'Remove last',
+            style: TextStyle(fontSize: 20, color: Colors.white),
+          ),
+          onPressed: () {
+            _removeLastItem();
+          },
+        ),
+        RaisedButton(
+          child: Text(
+            'Remove all',
+            style: TextStyle(fontSize: 20, color: Colors.white),
+          ),
+          onPressed: () {
+            _removeAllItems();
+          },
+        ),
+      ],
+      body: AnimatedList(
+        key: _listKey,
+        initialItemCount: _data.length,
+        itemBuilder: (context, index, animation) => _buildItem(context, _data[index], animation),
+      ),
+    );
+  }
+
+  Widget _buildItem(BuildContext context, String item, Animation<double> animation) {
+    TextStyle textStyle = new TextStyle(fontSize: 12);
+
+    return Padding(
+      padding: const EdgeInsets.all(0.1),
+      child: SizeTransition(
+        sizeFactor: animation,
+        axis: Axis.vertical,
+        child: SizedBox(
+          height: 50.0,
+          child: Card(
+            child: Center(
+              child: Text(item, style: textStyle, textAlign: TextAlign.center,),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _addAnItem() {
+    _data.insert(0, "Temperatura 24o0 ${DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now()).toString()}");
+    _listKey.currentState.insertItem(0);
+  }
+
+  void _removeLastItem() {
+    String itemToRemove = _data[0];
+
+    _listKey.currentState.removeItem(
+      0,
+          (BuildContext context, Animation<double> animation) => _buildItem(context, itemToRemove, animation),
+      duration: const Duration(milliseconds: 250),
+    );
+
+    _data.removeAt(0);
+  }
+
+  void _removeAllItems() {
+    final int itemCount = _data.length;
+
+    for (var i = 0; i < itemCount; i++) {
+      String itemToRemove = _data[0];
+      _listKey.currentState.removeItem(0,
+            (BuildContext context, Animation<double> animation) => _buildItem(context, itemToRemove, animation),
+        duration: const Duration(milliseconds: 250),
+      );
+
+      _data.removeAt(0);
+    }
+  }
+}
+
 
 //class DisplayScreen extends StatelessWidget {
 //
