@@ -13,7 +13,6 @@ void main() {
 }
 
 class FlutterBlueApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -30,7 +29,6 @@ class FlutterBlueApp extends StatelessWidget {
           }),
     );
   }
-
 }
 
 class BluetoothOffScreen extends StatelessWidget {
@@ -85,26 +83,26 @@ class FindDevicesScreen extends StatelessWidget {
                 builder: (c, snapshot) => Column(
                   children: snapshot.data
                       .map((d) => ListTile(
-                    title: Text(d.name),
-                    subtitle: Text(d.id.toString()),
-                    trailing: StreamBuilder<BluetoothDeviceState>(
-                      stream: d.state,
-                      initialData: BluetoothDeviceState.disconnected,
-                      builder: (c, snapshot) {
-                        if (snapshot.data ==
-                            BluetoothDeviceState.connected) {
-                          return RaisedButton(
-                            child: Text('OPEN'),
-                            onPressed: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        DeviceScreen(device: d))),
-                          );
-                        }
-                        return Text(snapshot.data.toString());
-                      },
-                    ),
-                  ))
+                            title: Text(d.name),
+                            subtitle: Text(d.id.toString()),
+                            trailing: StreamBuilder<BluetoothDeviceState>(
+                              stream: d.state,
+                              initialData: BluetoothDeviceState.disconnected,
+                              builder: (c, snapshot) {
+                                if (snapshot.data ==
+                                    BluetoothDeviceState.connected) {
+                                  return RaisedButton(
+                                    child: Text('OPEN'),
+                                    onPressed: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                DeviceScreen(device: d))),
+                                  );
+                                }
+                                return Text(snapshot.data.toString());
+                              },
+                            ),
+                          ))
                       .toList(),
                 ),
               ),
@@ -115,14 +113,14 @@ class FindDevicesScreen extends StatelessWidget {
                   children: snapshot.data
                       .map(
                         (r) => ScanResultTile(
-                      result: r,
-                      onTap: () => Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        r.device.connect();
-                        return DeviceScreen(device: r.device);
-                      })),
-                    ),
-                  )
+                          result: r,
+                          onTap: () => Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) {
+                            r.device.connect();
+                            return DeviceScreen(device: r.device);
+                          })),
+                        ),
+                      )
                       .toList(),
                 ),
               ),
@@ -157,11 +155,12 @@ class DeviceScreen extends StatelessWidget {
 
   final BluetoothDevice device;
 
-  static const String CHARACTERISTIC_UUID = "be39a5dc-048b-4b8f-84cb-94c197edd26e";
+  static const String CHARACTERISTIC_UUID =
+      "be39a5dc-048b-4b8f-84cb-94c197edd26e";
   static List<double> baseData = [0, 0];
   static List<double> dataSetA = <double>[];
   static List<double> dataSetB = <double>[];
-  static Set<String> _saved = Set<String>();   // Add this line.
+  static Set<String> _saved = Set<String>(); // Add this line.
   static bool switchDataSet = false;
   final int sizeOfArray = 10;
   static var tempValue;
@@ -180,72 +179,71 @@ class DeviceScreen extends StatelessWidget {
     return currentDataSet;
   }
 
+  void getBattery(String data) {
+    if (data.startsWith('B') == true || data.startsWith('b') == true) {
+      tempValue = data;
+      data = data.replaceAll(new RegExp('[^0-9.]'), '');
+      print(data);
+      var temp = double.parse(data);
+      assert(temp is double);
+      baseData.add(temp);
+    }
+  }
+
+  void getPressure(String data) {
+    if (data.startsWith('P') == true ||
+        data.startsWith('C') == true ||
+        data.startsWith('c') == true ||
+        data.startsWith('p') == true) {
+      tempValue = data;
+      data = data.replaceAll(new RegExp('[^0-9.]'), '');
+      print(data);
+      var temp = double.parse(data);
+      assert(temp is double);
+      baseData.add(temp);
+    }
+  }
+
+  void getHumidity(String data) {
+    if (data.startsWith('W') == true ||
+        data.startsWith('H') ||
+        data.startsWith('w') ||
+        data.startsWith('h')) {
+      tempValue = data;
+      data = data.replaceAll(new RegExp('[^0-9.]'), '');
+      print(data);
+      var temp = double.parse(data);
+      assert(temp is double);
+      baseData.add(temp);
+    }
+  }
+
+  void getTemperature(String data) {
+    if (data.startsWith('T') == true || data.startsWith('t') == true) {
+      tempValue = data;
+      data = data.replaceAll(new RegExp('[^0-9.]'), '');
+      print(data);
+      var temp = double.parse(data);
+      assert(temp is double);
+      baseData.add(temp);
+    }
+  }
+
   _getNewDataSet(String data) {
     if (data.isEmpty) return;
-    
+
     if (typeM == "T") {
-      if (data.startsWith('T') == true) {
-        tempValue = data;
-        data = data.substring(12,18);
-        print(data);
-        var temp = double.parse(data);
-        assert(temp is double);
-
-        if (switchDataSet) {
-          baseData = setDataSet(dataSetB, dataSetA, temp);
-        } else {
-          baseData = setDataSet(dataSetA, dataSetB, temp);
-        }
-        switchDataSet = !switchDataSet;
-      }
+      getTemperature(data);
+    } else if (typeM == "B") {
+      getBattery(data);
+    } else if (typeM == "P") {
+      getPressure(data);
+    } else if (typeM == "H") {
+      getHumidity(data);
+    } else if (typeM == "O") {
+      tempValue = data;
+      print(data);
     }
-    else if (typeM == "B"){
-      if (data.startsWith('B') == true) {
-        tempValue = data;
-        data = data.substring(8,14);
-        print(data);
-        var temp = double.parse(data);
-        assert(temp is double);
-
-        if (switchDataSet) {
-          baseData = setDataSet(dataSetB, dataSetA, temp);
-        } else {
-          baseData = setDataSet(dataSetA, dataSetB, temp);
-        }
-        switchDataSet = !switchDataSet;
-      }
-    } else if (typeM == "P"){
-      if (data.startsWith('P') == true) {
-        tempValue = data;
-        data = data.substring(6,15);
-        print(data);
-        var temp = double.parse(data);
-        assert(temp is double);
-
-        if (switchDataSet) {
-          baseData = setDataSet(dataSetB, dataSetA, temp);
-        } else {
-          baseData = setDataSet(dataSetA, dataSetB, temp);
-        }
-        switchDataSet = !switchDataSet;
-      }
-    } else if (typeM == "H"){
-      if (data.startsWith('W') == true) {
-        tempValue = data;
-        data = data.substring(11,17);
-        print(data);
-        var temp = double.parse(data);
-        assert(temp is double);
-
-        if (switchDataSet) {
-          baseData = setDataSet(dataSetB, dataSetA, temp);
-        } else {
-          baseData = setDataSet(dataSetA, dataSetB, temp);
-        }
-        switchDataSet = !switchDataSet;
-      }
-    }
-
   }
 
   addStringToSF(String sfString) async {
@@ -257,15 +255,16 @@ class DeviceScreen extends StatelessWidget {
     return utf8.decode(dataFromDevice);
   }
 
-  Widget _tickMeasurement(BuildContext context){
+  Widget _tickMeasurement(BuildContext context) {
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Material(// needed
+          Material(
+            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => typeM = "T", // needed
+              onTap: () => _cleanData("T"), // needed
               child: Image.asset(
                 "images/humidity.png",
                 width: 40,
@@ -274,10 +273,11 @@ class DeviceScreen extends StatelessWidget {
               ),
             ),
           ),
-          Material(// needed
+          Material(
+            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => typeM = "P", // needed
+              onTap: () => _cleanData("P"), // needed
               child: Icon(
                 Icons.arrow_drop_down_circle,
                 size: 40,
@@ -285,10 +285,11 @@ class DeviceScreen extends StatelessWidget {
               ),
             ),
           ),
-          Material(// needed
+          Material(
+            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => typeM = "B", // needed
+              onTap: () => _cleanData("B"), // needed
               child: Icon(
                 Icons.battery_alert,
                 size: 40,
@@ -296,10 +297,11 @@ class DeviceScreen extends StatelessWidget {
               ),
             ),
           ),
-          Material(// needed
+          Material(
+            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => typeM = "H", // needed
+              onTap: () => _cleanData("H"), // needed
               child: Image.asset(
                 "images/temperature.png",
                 width: 40,
@@ -308,7 +310,20 @@ class DeviceScreen extends StatelessWidget {
               ),
             ),
           ),
-          Material(// needed
+          Material(
+            // needed
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => typeM = "O", // needed
+              child: Icon(
+                Icons.text_fields,
+                size: 40,
+                color: Colors.black26,
+              ),
+            ),
+          ),
+          Material(
+            // needed
             color: Colors.transparent,
             child: InkWell(
               onTap: () => _pushSaved(context), // needed
@@ -322,97 +337,104 @@ class DeviceScreen extends StatelessWidget {
         ],
       ),
     );
-
-
   }
 
-  Widget _myService(List<BluetoothService> services){
+  Widget _myService(List<BluetoothService> services) {
     Stream<List<int>> stream;
 
-    services.forEach((service){
-      service.characteristics.forEach((character){
-        if(character.uuid.toString() == CHARACTERISTIC_UUID){
+    services.forEach((service) {
+      service.characteristics.forEach((character) {
+        if (character.uuid.toString() == CHARACTERISTIC_UUID) {
           character.setNotifyValue(!character.isNotifying);
           stream = character.value;
         }
       });
     });
 
-
     return Container(
-      child: StreamBuilder<List<int>>(stream: stream,
-        builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot){
-          if (snapshot.hasError)
-            return Text('Error : ${snapshot.error}');
+      child: StreamBuilder<List<int>>(
+          stream: stream,
+          builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
+            if (snapshot.hasError) return Text('Error : ${snapshot.error}');
 
-          if (snapshot.connectionState == ConnectionState.active){
-
-            var currentValue = _dataParser(snapshot.data);
+            if (snapshot.connectionState == ConnectionState.active) {
+              var currentValue = _dataParser(snapshot.data);
 //            var tempValue;
-            print(currentValue);
-            _saved.add("$currentValue ${DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now()).toString()}");
+              print(currentValue);
+              _saved.add(
+                  "$currentValue \n ${DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now()).toString()}");
 //            addStringToSF(currentValue);
-            print(tempValue);
-            _getNewDataSet(currentValue);
+              print(tempValue);
+              _getNewDataSet(currentValue);
 
-
-            return new Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  _tickMeasurement(context),
-                  SizedBox(height: 50),
-                  new Container(
-                    width: 300.0,
-                    height: 200.0,
-                    child: new Sparkline(
-                      data: baseData,
-                      lineGradient: LinearGradient(
-                        begin: Alignment.bottomLeft,
-                        end: Alignment.topRight,
-                        stops: [0.1, 0.5, 0.7, 0.9],
-                        colors: [
-                          Colors.indigo[100],
-                          Colors.indigo[400],
-                          Colors.indigo[600],
-                          Colors.indigo[900]
-                        ],
+              if (typeM == "O") {
+                return new Center(
+                  child: Column(
+                    children: <Widget>[
+                      _tickMeasurement(context),
+                      SizedBox(height: 50),
+                      Text(
+                        'Raw Message:',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 24),
                       ),
-                      lineWidth: 4,
-                      fillMode: FillMode.none,
-                      pointsMode: PointsMode.last,
-                      pointSize: 10.0,
-                      pointColor: Colors.red,
-                      sharpCorners: false,
-                    ),
+                      Text(
+                        '$tempValue',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 24),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 30),
-                  Text(
-                    '$tempValue',
-                    style:
-                    TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-                  )
-
-                ],
-              ),
-
-            );
-
-          } else {
-            return Center(child: Column(
-              children: <Widget>[
-                _tickMeasurement(context),
-                Text('Check the stream')
-              ],
-            ),
-
-            )
-          ;
-          }
-        }),
+                );
+              } else {
+                return new Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      _tickMeasurement(context),
+                      SizedBox(height: 50),
+                      new Container(
+                        width: 300.0,
+                        height: 200.0,
+                        child: new Sparkline(
+                          data: baseData,
+                          lineGradient: LinearGradient(
+                            begin: Alignment.bottomLeft,
+                            end: Alignment.topRight,
+                            stops: [0.2, 0.8],
+                            colors: [Colors.blue[200], Colors.blue[800]],
+                          ),
+                          lineWidth: 6,
+                          fillMode: FillMode.none,
+                          pointsMode: PointsMode.none,
+                          pointSize: 10.0,
+                          pointColor: Colors.purpleAccent,
+                          sharpCorners: false,
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      Text(
+                        '$tempValue',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 24),
+                      )
+                    ],
+                  ),
+                );
+              }
+            } else {
+              return Center(
+                child: Column(
+                  children: <Widget>[
+                    _tickMeasurement(context),
+                    Text('Check the stream')
+                  ],
+                ),
+              );
+            }
+          }),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -443,14 +465,14 @@ class DeviceScreen extends StatelessWidget {
               return Row(
                 children: <Widget>[
                   FlatButton(
-                      onPressed: onPressed,
-                      child: Text(
-                        text,
-                        style: Theme.of(context)
-                            .primaryTextTheme
-                            .button
-                            .copyWith(color: Colors.white),
-                      ),
+                    onPressed: onPressed,
+                    child: Text(
+                      text,
+                      style: Theme.of(context)
+                          .primaryTextTheme
+                          .button
+                          .copyWith(color: Colors.white),
+                    ),
                   )
                 ],
               );
@@ -521,38 +543,52 @@ class DeviceScreen extends StatelessWidget {
     );
   }
 
-  void _pushSaved(BuildContext context){
+  void _cleanData(String parameter) {
+    if (parameter == "O") {
+      typeM = "O";
+    } else if (parameter == "T") {
+      typeM = "T";
+    } else if (parameter == "P") {
+      typeM = "P";
+    } else if (parameter == "H") {
+      typeM = "H";
+    } else if (parameter == "B") {
+      typeM = "B";
+    }
+    baseData = [0, 0];
+  }
+
+  void _pushSaved(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (BuildContext context) {
           final Iterable<ListTile> tiles = _saved.map(
-                (String pair) {
+            (String pair) {
               return ListTile(
                 title: Text(
                   pair,
-                  style: TextStyle(fontWeight: FontWeight.w300, fontSize: 12,),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w300,
+                    fontSize: 12,
+                  ),
                 ),
               );
             },
           );
-          final List<Widget> divided = ListTile
-              .divideTiles(
+          final List<Widget> divided = ListTile.divideTiles(
             context: context,
             tiles: tiles,
-          )
-              .toList();
+          ).toList();
 
-          return Scaffold(         // Add 6 lines from here...
+          return Scaffold(
+            // Add 6 lines from here...
             appBar: AppBar(
               title: Text('Saved Data'),
             ),
             body: ListView(children: divided),
-          );                       // ... to here.
+          ); // ... to here.
         },
       ),
     );
-
-
-
   }
 }
