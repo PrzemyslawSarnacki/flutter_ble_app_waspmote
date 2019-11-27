@@ -157,6 +157,8 @@ class DeviceScreen extends StatelessWidget {
 
   static const String CHARACTERISTIC_UUID =
       "be39a5dc-048b-4b8f-84cb-94c197edd26e";
+  static const String WRITECHARACTERISTIC_UUID =
+      "013dc1df-9b8c-4b5c-949b-262543eba78a";
   static List<double> baseData = [0, 0];
   static List<double> dataSetA = <double>[];
   static List<double> dataSetB = <double>[];
@@ -326,6 +328,18 @@ class DeviceScreen extends StatelessWidget {
             // needed
             color: Colors.transparent,
             child: InkWell(
+              onTap: () => writeChar, // needed
+              child: Icon(
+                Icons.lightbulb_outline,
+                size: 40,
+                color: Colors.black26,
+              ),
+            ),
+          ),
+          Material(
+            // needed
+            color: Colors.transparent,
+            child: InkWell(
               onTap: () => _pushSaved(context), // needed
               child: Icon(
                 Icons.list,
@@ -351,6 +365,8 @@ class DeviceScreen extends StatelessWidget {
       });
     });
 
+    writeChar(services);
+
     return Container(
       child: StreamBuilder<List<int>>(
           stream: stream,
@@ -360,6 +376,7 @@ class DeviceScreen extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.active) {
               var currentValue = _dataParser(snapshot.data);
 //            var tempValue;
+
               print(currentValue);
               _saved.add(
                   "$currentValue \n ${DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now()).toString()}");
@@ -434,6 +451,16 @@ class DeviceScreen extends StatelessWidget {
             }
           }),
     );
+  }
+
+  void writeChar(List<BluetoothService> services) {
+    services.forEach((service) {
+      service.characteristics.forEach((character) {
+        if (character.uuid.toString() == WRITECHARACTERISTIC_UUID) {
+          character.write([1, 1]);
+        }
+      });
+    });
   }
 
   @override
