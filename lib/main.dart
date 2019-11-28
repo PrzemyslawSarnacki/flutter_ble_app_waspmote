@@ -258,6 +258,17 @@ class DeviceScreen extends StatelessWidget {
   }
 
   Widget _tickMeasurement(BuildContext context) {
+    void writeChar() async {
+      List<BluetoothService> services = await device.discoverServices();
+      services.forEach((service) {
+        service.characteristics.forEach((character) {
+          if (character.uuid.toString() == WRITECHARACTERISTIC_UUID) {
+            character.write([0x01]);
+          }
+        });
+      });
+    }
+
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -328,7 +339,7 @@ class DeviceScreen extends StatelessWidget {
             // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => writeChar, // needed
+              onTap: () => writeChar(), // needed
               child: Icon(
                 Icons.lightbulb_outline,
                 size: 40,
@@ -364,8 +375,6 @@ class DeviceScreen extends StatelessWidget {
         }
       });
     });
-
-    writeChar(services);
 
     return Container(
       child: StreamBuilder<List<int>>(
@@ -451,16 +460,6 @@ class DeviceScreen extends StatelessWidget {
             }
           }),
     );
-  }
-
-  void writeChar(List<BluetoothService> services) {
-    services.forEach((service) {
-      service.characteristics.forEach((character) {
-        if (character.uuid.toString() == WRITECHARACTERISTIC_UUID) {
-          character.write([1, 1]);
-        }
-      });
-    });
   }
 
   @override
