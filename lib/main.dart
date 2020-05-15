@@ -4,12 +4,64 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_ble_app/widgets.dart';
-import 'package:flutter_sparkline/flutter_sparkline.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:math';
 
 void main() {
   runApp(FlutterBlueApp());
+}
+
+class LineAnimationZoomChart extends StatelessWidget {
+  final List<charts.Series> seriesList;
+  final bool animate;
+
+  LineAnimationZoomChart(this.seriesList, {this.animate});
+
+
+  // EXCLUDE_FROM_GALLERY_DOCS_START
+  // This section is excluded from being copied to the gallery.
+  // It is used for creating random series data to demonstrate animation in
+  // the example app only.
+  factory LineAnimationZoomChart.withRandomData(List<double> countList) {
+    return new LineAnimationZoomChart(_createRandomData(countList));
+  }
+
+  /// Create random data.
+  static List<charts.Series<LinearSales, num>> _createRandomData(List<double> countList) {
+    final random = new Random();
+    final data = <LinearSales>[];
+
+    for (var i = 0; i < countList.length; i++) {
+      data.add(new LinearSales(i, countList[i]));
+    }
+    
+    return [
+      new charts.Series<LinearSales, int>(
+        id: 'Sales',
+        domainFn: (LinearSales sales, _) => sales.year,
+        measureFn: (LinearSales sales, _) => sales.sales,
+        data: data,
+      )
+    ];
+  }
+  // EXCLUDE_FROM_GALLERY_DOCS_END
+
+  @override
+  Widget build(BuildContext context) {
+    return new charts.LineChart(seriesList, animate: animate, behaviors: [
+      new charts.PanAndZoomBehavior(),
+    ]);
+  }
+}
+
+/// Sample linear data type.
+class LinearSales {
+  final int year;
+  final double sales;
+
+  LinearSales(this.year, this.sales);
 }
 
 class FlutterBlueApp extends StatelessWidget {
@@ -422,21 +474,8 @@ class DeviceScreen extends StatelessWidget {
                       new Container(
                         width: 300.0,
                         height: 200.0,
-                        child: new Sparkline(
-                          data: baseData,
-                          lineGradient: LinearGradient(
-                            begin: Alignment.bottomLeft,
-                            end: Alignment.topRight,
-                            stops: [0.2, 0.8],
-                            colors: [Colors.blue[200], Colors.blue[800]],
-                          ),
-                          lineWidth: 6,
-                          fillMode: FillMode.none,
-                          pointsMode: PointsMode.none,
-                          pointSize: 10.0,
-                          pointColor: Colors.purpleAccent,
-                          sharpCorners: false,
-                        ),
+                        child:
+                        Expanded(flex: 5, child: LineAnimationZoomChart.withRandomData(baseData)),
                       ),
                       SizedBox(height: 30),
                       Text(
