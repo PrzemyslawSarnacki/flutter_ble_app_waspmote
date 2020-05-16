@@ -40,6 +40,7 @@ class LineAnimationZoomChart extends StatelessWidget {
     return [
       new charts.Series<LinearSales, int>(
         id: 'Sales',
+        colorFn: (_, __) => charts.MaterialPalette.purple.shadeDefault,
         domainFn: (LinearSales sales, _) => sales.year,
         measureFn: (LinearSales sales, _) => sales.sales,
         data: data,
@@ -69,6 +70,10 @@ class FlutterBlueApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       color: Colors.lightBlue,
+            theme:
+      ThemeData(primarySwatch: Colors.lightBlue, brightness: Brightness.light),
+      themeMode: ThemeMode.dark,
+      darkTheme: ThemeData(brightness: Brightness.dark),
       home: StreamBuilder<BluetoothState>(
           stream: FlutterBlue.instance.state,
           initialData: BluetoothState.unknown,
@@ -102,7 +107,7 @@ class BluetoothOffScreen extends StatelessWidget {
               color: Colors.white54,
             ),
             Text(
-              'Bluetooth Adapter is ${state.toString().substring(15)}.',
+              'Bluetooth Adapter is ${state != null ? state.toString().substring(15) : 'not available'}.',
               style: Theme.of(context)
                   .primaryTextTheme
                   .subhead
