@@ -7,6 +7,7 @@ import 'package:flutter_ble_app/widgets.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:http/http.dart';
 import 'dart:math';
 
 void main() {
@@ -121,6 +122,11 @@ class BluetoothOffScreen extends StatelessWidget {
 }
 
 class FindDevicesScreen extends StatelessWidget {
+  void postData() {
+    print("clicked");
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,15 +202,25 @@ class FindDevicesScreen extends StatelessWidget {
               backgroundColor: Colors.red,
             );
           } else {
-            return FloatingActionButton(
-                child: Icon(Icons.search),
-                onPressed: () => FlutterBlue.instance
-                    .startScan(timeout: Duration(seconds: 4)));
+            return Center(
+              child: Row(
+                children: <Widget>[
+                  FloatingActionButton(
+                      child: Icon(Icons.cloud_upload),
+                      onPressed: () => postData()),
+                  FloatingActionButton(
+                      child: Icon(Icons.search),
+                      onPressed: () => FlutterBlue.instance
+                          .startScan(timeout: Duration(seconds: 4))),
+                ],
+              ),
+            );
           }
         },
       ),
     );
   }
+
 }
 
 class DeviceScreen extends StatelessWidget {
