@@ -7,7 +7,7 @@ import 'package:flutter_ble_app/widgets.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'dart:math';
 
 void main() {
@@ -20,7 +20,6 @@ class LineAnimationZoomChart extends StatelessWidget {
 
   LineAnimationZoomChart(this.seriesList, {this.animate});
 
-
   // EXCLUDE_FROM_GALLERY_DOCS_START
   // This section is excluded from being copied to the gallery.
   // It is used for creating random series data to demonstrate animation in
@@ -30,14 +29,15 @@ class LineAnimationZoomChart extends StatelessWidget {
   }
 
   /// Create random data.
-  static List<charts.Series<LinearSales, num>> _createRandomData(List<double> countList) {
+  static List<charts.Series<LinearSales, num>> _createRandomData(
+      List<double> countList) {
     final random = new Random();
     final data = <LinearSales>[];
 
     for (var i = 0; i < countList.length; i++) {
       data.add(new LinearSales(i, countList[i]));
     }
-    
+
     return [
       new charts.Series<LinearSales, int>(
         id: 'Sales',
@@ -71,8 +71,8 @@ class FlutterBlueApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       color: Colors.lightBlue,
-            theme:
-      ThemeData(primarySwatch: Colors.lightBlue, brightness: Brightness.light),
+      theme: ThemeData(
+          primarySwatch: Colors.lightBlue, brightness: Brightness.light),
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData(brightness: Brightness.dark),
       home: StreamBuilder<BluetoothState>(
@@ -122,8 +122,19 @@ class BluetoothOffScreen extends StatelessWidget {
 }
 
 class FindDevicesScreen extends StatelessWidget {
-  void postData() {
+
+  Future<http.Response> postData(String sensorType, String value) {
     print("clicked");
+    return http.post(
+      'http://sensor-dashboards.herokuapp.com/api/add-data/',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'sensor_type': sensorType,
+         'value': value,
+      }),
+    );
   }
 
 
@@ -202,12 +213,17 @@ class FindDevicesScreen extends StatelessWidget {
               backgroundColor: Colors.red,
             );
           } else {
-            return Center(
+            return Container(
+              alignment: Alignment.bottomCenter,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   FloatingActionButton(
                       child: Icon(Icons.cloud_upload),
-                      onPressed: () => postData()),
+                      onPressed: () => postData("3","466")),
+                  SizedBox(
+                    width: 5,
+                  ),
                   FloatingActionButton(
                       child: Icon(Icons.search),
                       onPressed: () => FlutterBlue.instance
@@ -220,7 +236,6 @@ class FindDevicesScreen extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class DeviceScreen extends StatelessWidget {
@@ -495,8 +510,10 @@ class DeviceScreen extends StatelessWidget {
                       new Container(
                         width: 300.0,
                         height: 200.0,
-                        child:
-                        Expanded(flex: 5, child: LineAnimationZoomChart.withRandomData(baseData)),
+                        child: Expanded(
+                            flex: 5,
+                            child: LineAnimationZoomChart.withRandomData(
+                                baseData)),
                       ),
                       SizedBox(height: 30),
                       Text(
