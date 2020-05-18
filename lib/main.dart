@@ -245,6 +245,7 @@ class DeviceScreen extends StatelessWidget {
 
   static const String CHARACTERISTIC_UUID =
       "be39a5dc-048b-4b8f-84cb-94c197edd26e";
+      // "00002a37-0000-1000-8000-00805f9b34fb";
   static const String WRITECHARACTERISTIC_UUID =
       "013dc1df-9b8c-4b5c-949b-262543eba78a";
   static List<double> baseData = [0, 0];
@@ -342,6 +343,7 @@ class DeviceScreen extends StatelessWidget {
   }
 
   String _dataParser(List<int> dataFromDevice) {
+    // return utf8.decode(dataFromDevice);
     return utf8.decode(dataFromDevice);
   }
 

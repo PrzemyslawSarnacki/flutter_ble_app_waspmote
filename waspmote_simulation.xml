@@ -1,0 +1,12 @@
+<macro name="3. Send notifications every second" icon="UPLOAD">
+   <assert-server-service description="To run this tutorial enable &apos;Sample configuration&apos; in GATT Server configuration. Service validation" instance-id="0" uuid="013dc1df-9b8c-4b5c-949b-262543eba78a">
+      <assert-characteristic description="Ensure 0000aaa1-0000-1000-8000-aabbccddeeff characteristic" uuid="013dc1df-9b8c-4b5c-949b-262543eba78a">
+         <property name="NOTIFY"/>
+      </assert-characteristic>
+   </assert-server-service>
+   <sleep description="This sample will show how to automate sending every second a notification from the Android device." timeout="300" />
+   <sleep description="Make sure the connected device enabled CCCD for 0000aaa1-0000-1000-8000-aabbccddeeff characteristic." timeout="200" />
+   <send-notification description="Send 0x0123456789 as notification from 0000aaa1-0000-1000-8000-aabbccddeeff." characteristic-uuid="013dc1df-9b8c-4b5c-949b-262543eba78a" service-uuid="eed82c0a-b1c2-401e-ae4a-afac80c90c72" value="0123456789"/>
+   <sleep description="Now sleep some time, so the notification is sent every second." timeout="400"/>
+   <sleep description="To run the macro in a loop check the &#8644; option above, and run macro with &#9654; button." timeout="100"/>
+</macro>
