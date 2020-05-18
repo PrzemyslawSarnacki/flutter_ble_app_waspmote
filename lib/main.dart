@@ -71,10 +71,10 @@ class FlutterBlueApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       color: Colors.lightBlue,
-      theme: ThemeData(
-          primarySwatch: Colors.lightBlue, brightness: Brightness.light),
-      themeMode: ThemeMode.dark,
-      darkTheme: ThemeData(brightness: Brightness.dark),
+      // theme: ThemeData(
+      //     primarySwatch: Colors.lightBlue, brightness: Brightness.light),
+      // themeMode: ThemeMode.dark,
+      // darkTheme: ThemeData(brightness: Brightness.dark),
       home: StreamBuilder<BluetoothState>(
           stream: FlutterBlue.instance.state,
           initialData: BluetoothState.unknown,
@@ -142,7 +142,7 @@ class FindDevicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Find Devices'),
+        title: Text('Find BT Devices'),
       ),
       body: RefreshIndicator(
         onRefresh: () =>
@@ -244,8 +244,8 @@ class DeviceScreen extends StatelessWidget {
   final BluetoothDevice device;
 
   static const String CHARACTERISTIC_UUID =
-      "be39a5dc-048b-4b8f-84cb-94c197edd26e";
-      // "00002a37-0000-1000-8000-00805f9b34fb";
+      // "be39a5dc-048b-4b8f-84cb-94c197edd26e";
+      "00002a37-0000-1000-8000-00805f9b34fb";
   static const String WRITECHARACTERISTIC_UUID =
       "013dc1df-9b8c-4b5c-949b-262543eba78a";
   static List<double> baseData = [0, 0];
@@ -271,7 +271,7 @@ class DeviceScreen extends StatelessWidget {
   }
 
   void getBattery(String data) {
-    if (data.startsWith('B') == true || data.startsWith('b') == true) {
+    if (data.toLowerCase().startsWith('B')) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
       print(data);
@@ -282,10 +282,8 @@ class DeviceScreen extends StatelessWidget {
   }
 
   void getPressure(String data) {
-    if (data.startsWith('P') == true ||
-        data.startsWith('C') == true ||
-        data.startsWith('c') == true ||
-        data.startsWith('p') == true) {
+    if (data.toLowerCase().startsWith('P') ||
+        data.toLowerCase().startsWith('C')) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
       print(data);
@@ -296,10 +294,8 @@ class DeviceScreen extends StatelessWidget {
   }
 
   void getHumidity(String data) {
-    if (data.startsWith('W') == true ||
-        data.startsWith('H') ||
-        data.startsWith('w') ||
-        data.startsWith('h')) {
+    if (data.toLowerCase().startsWith('W') ||
+        data.toLowerCase().startsWith('H')) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
       print(data);
@@ -310,14 +306,23 @@ class DeviceScreen extends StatelessWidget {
   }
 
   void getTemperature(String data) {
-    if (data.startsWith('T') == true || data.startsWith('t') == true) {
+    // if (data.toLowerCase().startsWith('T') ) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
       print(data);
-      var temp = double.parse(data);
+      // var temp = double.parse(data);
+      print("codeunit");
+      // print(data.codeUnitAt(1));
+      // var temp = double.parse(data.codeUnitAt(1).toString());
+      var rng = new Random();
+      print("rng");
+      print(rng);
+      var temp = rng.nextInt(100).toDouble();
+      print("temp");
+      print(temp);
       assert(temp is double);
       baseData.add(temp);
-    }
+    // }
   }
 
   _getNewDataSet(String data) {
@@ -475,7 +480,6 @@ class DeviceScreen extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.active) {
               var currentValue = _dataParser(snapshot.data);
 //            var tempValue;
-
               print(currentValue);
               _saved.add(
                   "$currentValue \n ${DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now()).toString()}");
@@ -563,6 +567,7 @@ class DeviceScreen extends StatelessWidget {
                   text = 'CONNECT';
                   break;
                 default:
+                  print("error");
                   onPressed = null;
                   text = snapshot.data.toString().substring(21).toUpperCase();
                   break;
