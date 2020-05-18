@@ -308,17 +308,10 @@ class DeviceScreen extends StatelessWidget {
   void getTemperature(String data) {
     // if (data.toLowerCase().startsWith('T') ) {
       tempValue = data;
-      data = data.replaceAll(new RegExp('[^0-9.]'), '');
       print(data);
-      // var temp = double.parse(data);
-      print("codeunit");
-      // print(data.codeUnitAt(1));
-      // var temp = double.parse(data.codeUnitAt(1).toString());
-      var rng = new Random();
-      print("rng");
-      print(rng);
-      var temp = rng.nextInt(100).toDouble();
-      print("temp");
+      // data = data.replaceAll(new RegExp('[^0-9.]'), '');
+      
+      var temp = double.parse(data.codeUnitAt(1).toString());
       print(temp);
       assert(temp is double);
       baseData.add(temp);
