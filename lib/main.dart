@@ -34,11 +34,9 @@ class LineAnimationZoomChart extends StatelessWidget {
     final random = new Random();
     final data = <LinearSales>[];
 
-    print(countList);
     for (var i = 0; i < countList.length; i++) {
       data.add(new LinearSales(i, countList[i]));
     }
-    print(data);
 
     return [
       new charts.Series<LinearSales, int>(
@@ -54,9 +52,23 @@ class LineAnimationZoomChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new charts.LineChart(seriesList, animate: animate, behaviors: [
-      new charts.PanAndZoomBehavior(),
-    ]);
+    var axis = charts.NumericAxisSpec(
+        renderSpec: charts.GridlineRendererSpec(
+            labelStyle: charts.TextStyleSpec(
+                fontSize: 10, color: charts.MaterialPalette.white),
+            lineStyle: charts.LineStyleSpec(
+                thickness: 0,
+                color: charts.MaterialPalette.gray.shadeDefault)));
+
+    return new charts.LineChart(
+      seriesList,
+      animate: animate,
+      behaviors: [
+        new charts.PanAndZoomBehavior(),
+      ],
+      primaryMeasureAxis: axis,
+      domainAxis: axis,
+    );
   }
 }
 
@@ -124,22 +136,6 @@ class BluetoothOffScreen extends StatelessWidget {
 }
 
 class FindDevicesScreen extends StatelessWidget {
-
-  Future<http.Response> postData(String sensorType, String value) {
-    print("clicked");
-    return http.post(
-      'http://sensor-dashboards.herokuapp.com/api/add-data/',
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'sensor_type': sensorType,
-         'value': value,
-      }),
-    );
-  }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -221,12 +217,6 @@ class FindDevicesScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   FloatingActionButton(
-                      child: Icon(Icons.cloud_upload),
-                      onPressed: () => postData("3","466")),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  FloatingActionButton(
                       child: Icon(Icons.search),
                       onPressed: () => FlutterBlue.instance
                           .startScan(timeout: Duration(seconds: 4))),
@@ -241,13 +231,26 @@ class FindDevicesScreen extends StatelessWidget {
 }
 
 class DeviceScreen extends StatelessWidget {
+  Future<http.Response> postData(String sensorType, String value) {
+    return http.post(
+      'http://sensor-dashboards.herokuapp.com/api/add-data/',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'sensor_type': sensorType,
+        'value': value,
+      }),
+    );
+  }
+
   const DeviceScreen({Key key, this.device}) : super(key: key);
 
   final BluetoothDevice device;
 
   static const String CHARACTERISTIC_UUID =
       "be39a5dc-048b-4b8f-84cb-94c197edd26e";
-      // "00002a37-0000-1000-8000-00805f9b34fb";
+  // "00002a37-0000-1000-8000-00805f9b34fb";
   static const String WRITECHARACTERISTIC_UUID =
       "013dc1df-9b8c-4b5c-949b-262543eba78a";
   static List<double> baseData = [0, 0];
@@ -276,10 +279,11 @@ class DeviceScreen extends StatelessWidget {
     if (data.toUpperCase().startsWith('B')) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
-      print(data);
-      var temp = double.parse(data);
-      assert(temp is double);
-      baseData.add(temp);
+      if (data.isNotEmpty) {
+        var temp = double.parse(data);
+        assert(temp is double);
+        baseData.add(temp);
+      }
     }
   }
 
@@ -288,10 +292,11 @@ class DeviceScreen extends StatelessWidget {
         data.toUpperCase().startsWith('C')) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
-      print(data);
-      var temp = double.parse(data);
-      assert(temp is double);
-      baseData.add(temp);
+      if (data.isNotEmpty) {
+        var temp = double.parse(data);
+        assert(temp is double);
+        baseData.add(temp);
+      }
     }
   }
 
@@ -300,20 +305,23 @@ class DeviceScreen extends StatelessWidget {
         data.toUpperCase().startsWith('H')) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
-      print(data);
-      var temp = double.parse(data);
-      assert(temp is double);
-      baseData.add(temp);
+      if (data.isNotEmpty) {
+        var temp = double.parse(data);
+        assert(temp is double);
+        baseData.add(temp);
+      }
     }
   }
 
   void getTemperature(String data) {
-    if (data.toUpperCase().startsWith('T') ) {
+    if (data.toUpperCase().startsWith('T')) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
-      var temp = double.parse(data);
-      assert(temp is double);
-      baseData.add(temp);
+      if (data.isNotEmpty) {
+        var temp = double.parse(data);
+        assert(temp is double);
+        baseData.add(temp);
+      }
     }
   }
 
@@ -330,7 +338,6 @@ class DeviceScreen extends StatelessWidget {
       getHumidity(data);
     } else if (typeM == "O") {
       tempValue = data;
-      print(data);
     }
   }
 
@@ -340,7 +347,6 @@ class DeviceScreen extends StatelessWidget {
   }
 
   String _dataParser(List<int> dataFromDevice) {
-    // return utf8.decode(dataFromDevice);
     return utf8.decode(dataFromDevice);
   }
 
@@ -368,7 +374,7 @@ class DeviceScreen extends StatelessWidget {
               child: Image.asset(
                 "images/humidity.png",
                 width: 40,
-                color: Colors.black26,
+                color: Colors.white70,
                 fit: BoxFit.cover,
               ),
             ),
@@ -381,7 +387,7 @@ class DeviceScreen extends StatelessWidget {
               child: Icon(
                 Icons.arrow_drop_down_circle,
                 size: 40,
-                color: Colors.black26,
+                color: Colors.white70,
               ),
             ),
           ),
@@ -393,7 +399,7 @@ class DeviceScreen extends StatelessWidget {
               child: Icon(
                 Icons.battery_alert,
                 size: 40,
-                color: Colors.black26,
+                color: Colors.white70,
               ),
             ),
           ),
@@ -405,7 +411,7 @@ class DeviceScreen extends StatelessWidget {
               child: Image.asset(
                 "images/temperature.png",
                 width: 40,
-                color: Colors.black26,
+                color: Colors.white70,
                 fit: BoxFit.cover,
               ),
             ),
@@ -418,7 +424,7 @@ class DeviceScreen extends StatelessWidget {
               child: Icon(
                 Icons.text_fields,
                 size: 40,
-                color: Colors.black26,
+                color: Colors.white70,
               ),
             ),
           ),
@@ -430,7 +436,7 @@ class DeviceScreen extends StatelessWidget {
               child: Icon(
                 Icons.lightbulb_outline,
                 size: 40,
-                color: Colors.black26,
+                color: Colors.white70,
               ),
             ),
           ),
@@ -442,7 +448,7 @@ class DeviceScreen extends StatelessWidget {
               child: Icon(
                 Icons.list,
                 size: 40,
-                color: Colors.black26,
+                color: Colors.white70,
               ),
             ),
           )
@@ -471,12 +477,8 @@ class DeviceScreen extends StatelessWidget {
 
             if (snapshot.connectionState == ConnectionState.active) {
               var currentValue = _dataParser(snapshot.data);
-//            var tempValue;
-              print(currentValue);
               _saved.add(
                   "$currentValue \n ${DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now()).toString()}");
-//            addStringToSF(currentValue);
-              print(tempValue);
               _getNewDataSet(currentValue);
 
               if (typeM == "O") {
@@ -620,18 +622,19 @@ class DeviceScreen extends StatelessWidget {
                 ),
               ),
             ),
-            StreamBuilder<int>(
-              stream: device.mtu,
-              initialData: 0,
-              builder: (c, snapshot) => ListTile(
-                title: Text('MTU Size'),
-                subtitle: Text('${snapshot.data} bytes'),
-                trailing: IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () => device.requestMtu(223),
-                ),
-              ),
-            ),
+            SizedBox(height: 5,),
+            // StreamBuilder<int>(
+            //   stream: device.mtu,
+            //   initialData: 0,
+            //   builder: (c, snapshot) => ListTile(
+            //     title: Text('MTU Size'),
+            //     subtitle: Text('${snapshot.data} bytes'),
+            //     trailing: IconButton(
+            //       icon: Icon(Icons.edit),
+            //       onPressed: () => device.requestMtu(223),
+            //     ),
+            //   ),
+            // ),
             StreamBuilder<List<BluetoothService>>(
               stream: device.services,
               initialData: [],
@@ -639,6 +642,18 @@ class DeviceScreen extends StatelessWidget {
                 return _myService(snapshot.data);
               },
             ),
+          ],
+        ),
+      ),
+      floatingActionButton: Container(
+        alignment: Alignment.bottomCenter,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            FloatingActionButton(
+                child: Icon(Icons.cloud_upload),
+                onPressed: () => postData(
+                    tempValue.replaceAll(new RegExp('[^0-9.]'), ''), "466")),
           ],
         ),
       ),
@@ -650,14 +665,14 @@ class DeviceScreen extends StatelessWidget {
       typeM = "O";
     } else if (parameter == "T") {
       typeM = "T";
-    } else if (parameter == "P") { 
+    } else if (parameter == "P") {
       typeM = "P";
     } else if (parameter == "H") {
       typeM = "H";
     } else if (parameter == "B") {
       typeM = "B";
     }
-    baseData = [0, 0];
+    baseData = [];
   }
 
   void _pushSaved(BuildContext context) {
@@ -683,12 +698,11 @@ class DeviceScreen extends StatelessWidget {
           ).toList();
 
           return Scaffold(
-            // Add 6 lines from here...
             appBar: AppBar(
               title: Text('Saved Data'),
             ),
             body: ListView(children: divided),
-          ); // ... to here.
+          );
         },
       ),
     );
