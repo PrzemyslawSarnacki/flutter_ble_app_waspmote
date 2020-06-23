@@ -34,9 +34,11 @@ class LineAnimationZoomChart extends StatelessWidget {
     final random = new Random();
     final data = <LinearSales>[];
 
+    print(countList);
     for (var i = 0; i < countList.length; i++) {
       data.add(new LinearSales(i, countList[i]));
     }
+    print(data);
 
     return [
       new charts.Series<LinearSales, int>(
@@ -244,8 +246,8 @@ class DeviceScreen extends StatelessWidget {
   final BluetoothDevice device;
 
   static const String CHARACTERISTIC_UUID =
-      // "be39a5dc-048b-4b8f-84cb-94c197edd26e";
-      "00002a37-0000-1000-8000-00805f9b34fb";
+      "be39a5dc-048b-4b8f-84cb-94c197edd26e";
+      // "00002a37-0000-1000-8000-00805f9b34fb";
   static const String WRITECHARACTERISTIC_UUID =
       "013dc1df-9b8c-4b5c-949b-262543eba78a";
   static List<double> baseData = [0, 0];
@@ -271,7 +273,7 @@ class DeviceScreen extends StatelessWidget {
   }
 
   void getBattery(String data) {
-    if (data.toLowerCase().startsWith('B')) {
+    if (data.toUpperCase().startsWith('B')) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
       print(data);
@@ -282,8 +284,8 @@ class DeviceScreen extends StatelessWidget {
   }
 
   void getPressure(String data) {
-    if (data.toLowerCase().startsWith('P') ||
-        data.toLowerCase().startsWith('C')) {
+    if (data.toUpperCase().startsWith('P') ||
+        data.toUpperCase().startsWith('C')) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
       print(data);
@@ -294,8 +296,8 @@ class DeviceScreen extends StatelessWidget {
   }
 
   void getHumidity(String data) {
-    if (data.toLowerCase().startsWith('W') ||
-        data.toLowerCase().startsWith('H')) {
+    if (data.toUpperCase().startsWith('W') ||
+        data.toUpperCase().startsWith('H')) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
       print(data);
@@ -306,7 +308,7 @@ class DeviceScreen extends StatelessWidget {
   }
 
   void getTemperature(String data) {
-    if (data.toLowerCase().startsWith('T') ) {
+    if (data.toUpperCase().startsWith('T') ) {
       tempValue = data;
       data = data.replaceAll(new RegExp('[^0-9.]'), '');
       var temp = double.parse(data);
@@ -648,7 +650,7 @@ class DeviceScreen extends StatelessWidget {
       typeM = "O";
     } else if (parameter == "T") {
       typeM = "T";
-    } else if (parameter == "P") {
+    } else if (parameter == "P") { 
       typeM = "P";
     } else if (parameter == "H") {
       typeM = "H";
