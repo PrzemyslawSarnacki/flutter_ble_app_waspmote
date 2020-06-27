@@ -31,7 +31,6 @@ class LineAnimationZoomChart extends StatelessWidget {
   /// Create random data.
   static List<charts.Series<LinearSales, num>> _createRandomData(
       List<double> countList) {
-    final random = new Random();
     final data = <LinearSales>[];
 
     for (var i = 0; i < countList.length; i++) {
@@ -89,6 +88,7 @@ class FlutterBlueApp extends StatelessWidget {
           primarySwatch: Colors.lightBlue, brightness: Brightness.light),
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData(brightness: Brightness.dark),
+      debugShowCheckedModeBanner: false,
       home: StreamBuilder<BluetoothState>(
           stream: FlutterBlue.instance.state,
           initialData: BluetoothState.unknown,
@@ -249,10 +249,12 @@ class DeviceScreen extends StatelessWidget {
   final BluetoothDevice device;
 
   static const String CHARACTERISTIC_UUID =
-      "be39a5dc-048b-4b8f-84cb-94c197edd26e";
-  // "00002a37-0000-1000-8000-00805f9b34fb";
+      // "be39a5dc-048b-4b8f-84cb-94c197edd26e";
+      // "00002a37-0000-1000-8000-00805f9b34fb";
+      "013dc1df-9b8c-4b5c-949b-262543eba78a";
   static const String WRITECHARACTERISTIC_UUID =
       "013dc1df-9b8c-4b5c-949b-262543eba78a";
+  // "0000aab0-0000-1000-8000-aabbccddeeff";
   static List<double> baseData = [0, 0];
   static List<double> dataSetA = <double>[];
   static List<double> dataSetB = <double>[];
@@ -350,16 +352,53 @@ class DeviceScreen extends StatelessWidget {
     return utf8.decode(dataFromDevice);
   }
 
-  Widget _tickMeasurement(BuildContext context) {
-    void writeChar() async {
-      List<BluetoothService> services = await device.discoverServices();
-      services.forEach((service) {
-        service.characteristics.forEach((character) {
-          if (character.uuid.toString() == WRITECHARACTERISTIC_UUID) {
-            character.write([0x01]);
-          }
-        });
-      });
+  Widget _tickMeasurement(
+      BuildContext context, List<BluetoothService> services) {
+    final _writeController = TextEditingController();
+
+    void _writeChar() async {
+      await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Write"),
+              content: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      controller: _writeController,
+                    ),
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Send"),
+                  onPressed: () {
+                    print("ok");
+                    services.forEach((service) {
+                      service.characteristics.forEach((character) {
+                        if (character.uuid.toString() ==
+                            WRITECHARACTERISTIC_UUID) {
+                          if (character.properties.write) {
+                            character.write(
+                                utf8.encode(_writeController.value.text));
+                            Navigator.pop(context);
+                          }
+                        }
+                      });
+                    });
+                  },
+                ),
+                FlatButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          });
     }
 
     return Center(
@@ -367,10 +406,9 @@ class DeviceScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Material(
-            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => _cleanData("T"), // needed
+              onTap: () => _cleanData("T"),
               child: Image.asset(
                 "images/humidity.png",
                 width: 40,
@@ -380,10 +418,9 @@ class DeviceScreen extends StatelessWidget {
             ),
           ),
           Material(
-            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => _cleanData("P"), // needed
+              onTap: () => _cleanData("P"),
               child: Icon(
                 Icons.arrow_drop_down_circle,
                 size: 40,
@@ -392,10 +429,9 @@ class DeviceScreen extends StatelessWidget {
             ),
           ),
           Material(
-            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => _cleanData("B"), // needed
+              onTap: () => _cleanData("B"),
               child: Icon(
                 Icons.battery_alert,
                 size: 40,
@@ -404,10 +440,9 @@ class DeviceScreen extends StatelessWidget {
             ),
           ),
           Material(
-            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => _cleanData("H"), // needed
+              onTap: () => _cleanData("H"),
               child: Image.asset(
                 "images/temperature.png",
                 width: 40,
@@ -417,10 +452,9 @@ class DeviceScreen extends StatelessWidget {
             ),
           ),
           Material(
-            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => typeM = "O", // needed
+              onTap: () => typeM = "O",
               child: Icon(
                 Icons.text_fields,
                 size: 40,
@@ -429,10 +463,9 @@ class DeviceScreen extends StatelessWidget {
             ),
           ),
           Material(
-            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => writeChar(), // needed
+              onTap: () => _writeChar(),
               child: Icon(
                 Icons.lightbulb_outline,
                 size: 40,
@@ -441,10 +474,9 @@ class DeviceScreen extends StatelessWidget {
             ),
           ),
           Material(
-            // needed
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => _pushSaved(context), // needed
+              onTap: () => _pushSaved(context),
               child: Icon(
                 Icons.list,
                 size: 40,
@@ -485,7 +517,7 @@ class DeviceScreen extends StatelessWidget {
                 return new Center(
                   child: Column(
                     children: <Widget>[
-                      _tickMeasurement(context),
+                      _tickMeasurement(context, services),
                       SizedBox(height: 50),
                       Text(
                         'Raw Message:',
@@ -505,7 +537,7 @@ class DeviceScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      _tickMeasurement(context),
+                      _tickMeasurement(context, services),
                       SizedBox(height: 50),
                       new Container(
                         width: 300.0,
@@ -529,7 +561,7 @@ class DeviceScreen extends StatelessWidget {
               return Center(
                 child: Column(
                   children: <Widget>[
-                    _tickMeasurement(context),
+                    _tickMeasurement(context, services),
                     Text('Check the stream')
                   ],
                 ),
@@ -622,7 +654,9 @@ class DeviceScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 5,),
+            SizedBox(
+              height: 5,
+            ),
             // StreamBuilder<int>(
             //   stream: device.mtu,
             //   initialData: 0,
