@@ -249,9 +249,9 @@ class DeviceScreen extends StatelessWidget {
   final BluetoothDevice device;
 
   static const String CHARACTERISTIC_UUID =
-      // "be39a5dc-048b-4b8f-84cb-94c197edd26e";
-      // "00002a37-0000-1000-8000-00805f9b34fb";
-      "013dc1df-9b8c-4b5c-949b-262543eba78a";
+      "be39a5dc-048b-4b8f-84cb-94c197edd26e";
+  // "00002a37-0000-1000-8000-00805f9b34fb";
+  // "013dc1df-9b8c-4b5c-949b-262543eba78a";
   static const String WRITECHARACTERISTIC_UUID =
       "013dc1df-9b8c-4b5c-949b-262543eba78a";
   // "0000aab0-0000-1000-8000-aabbccddeeff";
@@ -524,10 +524,28 @@ class DeviceScreen extends StatelessWidget {
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 24),
                       ),
-                      Text(
-                        '$tempValue',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 24),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10),
+                            bottomRight: Radius.circular(10),
+                            topLeft: Radius.circular(10),
+                            bottomLeft: Radius.circular(10),
+                          ),
+                          color: Color(0XFF2c75fd),
+                          
+                        ),
+                        child: Text(
+                          "$tempValue",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                     ],
                   ),
