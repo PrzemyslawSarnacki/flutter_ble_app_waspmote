@@ -8,7 +8,6 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'dart:math';
 
 void main() {
   runApp(FlutterBlueApp());
