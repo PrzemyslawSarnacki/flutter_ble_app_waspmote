@@ -262,7 +262,7 @@ class DeviceScreen extends StatelessWidget {
   static bool switchDataSet = false;
   final int sizeOfArray = 10;
   static var tempValue;
-  static var typeM;
+  static String typeM;
 
   List<double> setDataSet(List<double> currentDataSet,
       List<double> previousDataSet, double newData) {
