@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_ble_app/widgets.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -38,10 +41,10 @@ class LineAnimationZoomChart extends StatelessWidget {
 
     return [
       new charts.Series<LinearSales, int>(
-        id: 'Sales',
+        id: 'Line',
         colorFn: (_, __) => charts.MaterialPalette.purple.shadeDefault,
-        domainFn: (LinearSales sales, _) => sales.year,
-        measureFn: (LinearSales sales, _) => sales.sales,
+        domainFn: (LinearSales sales, _) => sales.x,
+        measureFn: (LinearSales sales, _) => sales.y,
         data: data,
       )
     ];
@@ -72,10 +75,10 @@ class LineAnimationZoomChart extends StatelessWidget {
 
 /// Sample linear data type.
 class LinearSales {
-  final int year;
-  final double sales;
+  final int x;
+  final double y;
 
-  LinearSales(this.year, this.sales);
+  LinearSales(this.x, this.y);
 }
 
 class FlutterBlueApp extends StatelessWidget {
@@ -231,17 +234,46 @@ class FindDevicesScreen extends StatelessWidget {
 }
 
 class DeviceScreen extends StatelessWidget {
-  Future<http.Response> postData(String sensorType, String value) {
-    return http.post(
-      'http://sensor-dashboards.herokuapp.com/api/add-data/',
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'sensor_type': sensorType,
-        'value': value,
-      }),
-    );
+  void postData(String sensorType, String value, BuildContext context) async {
+    final http.Response response = await http
+        .post(
+          'http://sensor-dashboards.herokuapp.com/api/add-data/',
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'sensor_type': sensorType,
+            'value': value,
+          }),
+        )
+        .catchError(
+            (onError) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('Some Error occured'),
+                  duration: const Duration(seconds: 1),
+                  action: SnackBarAction(
+                    label: 'ACTION',
+                    onPressed: () {},
+                  ),
+                )));
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text('Data Uploaded successully!'),
+        duration: const Duration(seconds: 1),
+        action: SnackBarAction(
+          label: 'ACTION',
+          onPressed: () {},
+        ),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text('Some Error occured'),
+        duration: const Duration(seconds: 1),
+        action: SnackBarAction(
+          label: 'ACTION',
+          onPressed: () {},
+        ),
+      ));
+    }
   }
 
   const DeviceScreen(this.device);
@@ -702,9 +734,10 @@ class DeviceScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             FloatingActionButton(
-                child: Icon(Icons.cloud_upload),
-                onPressed: () => postData(
-                    tempValue.replaceAll(new RegExp('[^0-9.]'), ''), "466")),
+              child: Icon(Icons.cloud_upload),
+              onPressed: () => postData("1",
+                  tempValue.replaceAll(new RegExp('[^0-9.]'), ''), context),
+            ),
           ],
         ),
       ),
@@ -733,25 +766,24 @@ class DeviceScreen extends StatelessWidget {
           final Iterable<ListTile> tiles = _saved.map(
             (List pair) {
               return ListTile(
+                trailing: Text(
+                  pair[1],
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 12,
+                  ),
+                ),
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       pair[0],
-                      textAlign: TextAlign.left,
+                      textAlign: TextAlign.right,
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                       ),
-                    ),
-                    Text(
-                      pair[1],
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 12,           
-                      ),
-                      
                     ),
                   ],
                 ),
@@ -768,9 +800,31 @@ class DeviceScreen extends StatelessWidget {
               title: Text('Saved Data'),
             ),
             body: ListView(children: divided),
+            floatingActionButton: Container(
+              alignment: Alignment.bottomCenter,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  FloatingActionButton(
+                    child: Icon(Icons.cloud_download),
+                    onPressed: () => _saveToFile(),
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),
     );
+  }
+
+  Future<void> _saveToFile() async {
+    List<List<dynamic>> listOfLists = _saved.toList();
+    String csv = ListToCsvConverter().convert(listOfLists);
+    final directory = await getExternalStorageDirectory();
+    final pathOfTheFileToWrite = directory.path + "/myCsvFile.csv";
+    File file = File(pathOfTheFileToWrite);
+    file.writeAsString(csv);
+
   }
 }
