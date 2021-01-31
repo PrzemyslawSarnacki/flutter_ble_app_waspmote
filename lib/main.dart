@@ -18,7 +18,7 @@ class LineAnimationZoomChart extends StatelessWidget {
   final List<charts.Series> seriesList;
   final bool animate;
 
-  LineAnimationZoomChart(this.seriesList, {this.animate});
+  LineAnimationZoomChart(this.seriesList, {this.animate = false});
 
   // EXCLUDE_FROM_GALLERY_DOCS_START
   // This section is excluded from being copied to the gallery.
@@ -97,19 +97,20 @@ class FlutterBlueApp extends StatelessWidget {
             if (state == BluetoothState.on) {
               return FindDevicesScreen();
             }
-            return BluetoothOffScreen(state: state);
+            return BluetoothOffScreen(state);
           }),
     );
   }
 }
 
 class BluetoothOffScreen extends StatelessWidget {
-  const BluetoothOffScreen({Key key, this.state}) : super(key: key);
+  const BluetoothOffScreen(this.state);
 
   final BluetoothState state;
 
   @override
   Widget build(BuildContext context) {
+    assert(context != null);
     return Scaffold(
       backgroundColor: Colors.lightBlue,
       body: Center(
@@ -125,7 +126,7 @@ class BluetoothOffScreen extends StatelessWidget {
               'Bluetooth Adapter is ${state != null ? state.toString().substring(15) : 'not available'}.',
               style: Theme.of(context)
                   .primaryTextTheme
-                  .subhead
+                  .subtitle1
                   .copyWith(color: Colors.white),
             ),
           ],
@@ -168,7 +169,7 @@ class FindDevicesScreen extends StatelessWidget {
                                     onPressed: () => Navigator.of(context).push(
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                DeviceScreen(device: d))),
+                                                DeviceScreen(d))),
                                   );
                                 }
                                 return Text(snapshot.data.toString());
@@ -189,7 +190,7 @@ class FindDevicesScreen extends StatelessWidget {
                           onTap: () => Navigator.of(context)
                               .push(MaterialPageRoute(builder: (context) {
                             r.device.connect();
-                            return DeviceScreen(device: r.device);
+                            return DeviceScreen(r.device);
                           })),
                         ),
                       )
@@ -244,7 +245,7 @@ class DeviceScreen extends StatelessWidget {
     );
   }
 
-  const DeviceScreen({Key key, this.device}) : super(key: key);
+  const DeviceScreen(this.device);
 
   final BluetoothDevice device;
 
@@ -258,7 +259,7 @@ class DeviceScreen extends StatelessWidget {
   static List<double> baseData = [0, 0];
   static List<double> dataSetA = <double>[];
   static List<double> dataSetB = <double>[];
-  static Set<String> _saved = Set<String>(); // Add this line.
+  static Set<List<String>> _saved = Set<List<String>>(); // Add this line.
   static bool switchDataSet = false;
   final int sizeOfArray = 10;
   static var tempValue;
@@ -378,8 +379,7 @@ class DeviceScreen extends StatelessWidget {
                     print("ok");
                     services.forEach((service) {
                       service.characteristics.forEach((character) {
-                        if (character.uuid.toString() ==
-                            WRITECHARACTERISTIC_UUID) {
+                        if (character.uuid.toString() == CHARACTERISTIC_UUID) {
                           if (character.properties.write) {
                             character.write(
                                 utf8.encode(_writeController.value.text));
@@ -509,8 +509,10 @@ class DeviceScreen extends StatelessWidget {
 
             if (snapshot.connectionState == ConnectionState.active) {
               var currentValue = _dataParser(snapshot.data);
-              _saved.add(
-                  "$currentValue \n ${DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now()).toString()}");
+              _saved.add([
+                "$currentValue",
+                "${DateFormat('kk:mm:ss \n EEE d MMM').format(DateTime.now()).toString()}"
+              ]);
               _getNewDataSet(currentValue);
 
               if (typeM == "O") {
@@ -537,7 +539,6 @@ class DeviceScreen extends StatelessWidget {
                             bottomLeft: Radius.circular(10),
                           ),
                           color: Color(0XFF2c75fd),
-                          
                         ),
                         child: Text(
                           "$tempValue",
@@ -611,8 +612,7 @@ class DeviceScreen extends StatelessWidget {
                   text = 'CONNECT';
                   break;
                 default:
-                  print("error");
-                  onPressed = null;
+                  onPressed = () => print("error");
                   text = snapshot.data.toString().substring(21).toUpperCase();
                   break;
               }
@@ -732,14 +732,29 @@ class DeviceScreen extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (BuildContext context) {
           final Iterable<ListTile> tiles = _saved.map(
-            (String pair) {
+            (List pair) {
               return ListTile(
-                title: Text(
-                  pair,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w300,
-                    fontSize: 12,
-                  ),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      pair[0],
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      pair[1],
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 12,           
+                      ),
+                      
+                    ),
+                  ],
                 ),
               );
             },
