@@ -32,7 +32,7 @@ class FlatMessageInputBox extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColorLight,
+        color: Color(0xff262833),
         borderRadius: BorderRadius.circular(cornerRadius()),
         boxShadow: [
           BoxShadow(
@@ -45,7 +45,7 @@ class FlatMessageInputBox extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColorDark.withOpacity(0.1),
+          color: Color(0xff262833).withOpacity(0.1),
           borderRadius: BorderRadius.circular(cornerRadius()),
         ),
         padding: EdgeInsets.symmetric(
@@ -64,13 +64,13 @@ class FlatMessageInputBox extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: "Write Characteristic...",
                   hintStyle: TextStyle(
-                    color: Theme.of(context).primaryColorDark.withOpacity(0.6),
+                    color: Color(0xffFCF9F5).withOpacity(0.6),
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.all(16.0,),
                 ),
                 style: TextStyle(
-                    color: Theme.of(context).primaryColorDark
+                    color: Color(0xffFCF9F5)
                 ),
               ),
             ),
@@ -80,7 +80,7 @@ class FlatMessageInputBox extends StatelessWidget {
               icon: Icon(
                 Icons.send,
                 size: 24.0,
-                color: Theme.of(context).primaryColorDark,
+                color: Color(0xffFCF9F5),
               ),
             ),
           ],

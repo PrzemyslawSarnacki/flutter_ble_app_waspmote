@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_ble_app/flat_widgets/scroll_behavior.dart';
 
 enum ScrollType {
   fixedHeader,
@@ -65,7 +66,7 @@ class _PageBodyWidget extends StatelessWidget {
         children: [
           Positioned(
             child: ScrollConfiguration(
-              behavior: ScrollBehavior(),
+              behavior: GlowRemoveScrollBehaviour(),
               child: ListView(
                 reverse: reverseBodyList ?? false,
                 padding: EdgeInsets.only(
@@ -97,7 +98,7 @@ class _PageBodyWidget extends StatelessWidget {
           header ?? Container(),
           Expanded(
             child: ScrollConfiguration(
-              behavior: ScrollBehavior(),
+              behavior: GlowRemoveScrollBehaviour(),
               child: ListView(
                 reverse: reverseBodyList ?? false,
                 padding: EdgeInsets.all(0.0),

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -9,9 +8,9 @@ import 'package:flutter_ble_app/flat_widgets/flat_chat_message.dart';
 import 'package:flutter_ble_app/flat_widgets/flat_message_input_box.dart';
 import 'package:flutter_ble_app/flat_widgets/flat_page_header.dart';
 import 'package:flutter_ble_app/flat_widgets/flat_page_wrapper.dart';
-import 'package:flutter_ble_app/widgets.dart';
-import 'package:flutter_ble_app/main.dart';
+import 'package:flutter_ble_app/device_screen.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+
 
 class ChatScreen extends StatefulWidget {
   final BluetoothDevice device;
@@ -48,7 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
     services.forEach((service) {
       service.characteristics.forEach((character) {
         if (character.uuid.toString() == DeviceScreen.CHARACTERISTIC_UUID) {
-          character.setNotifyValue(!character.isNotifying);
+          // character.setNotifyValue(!character.isNotifying);
           stream = character.value;
         }
       });
@@ -65,9 +64,13 @@ class _ChatScreenState extends State<ChatScreen> {
               _addNewMessage(currentValue);
               return FlatPageWrapper(
                 scrollType: ScrollType.floatingHeader,
-                reverseBodyList: false,
+                reverseBodyList: true,
+                backgroundColor: Color(0xff262833),
                 header: FlatPageHeader(
+                  backgroundColor: Color(0xff262833),
+                  textColor: Color(0xffFCF9F5),
                   prefixWidget: FlatActionButton(
+                    iconColor: Color(0xffFCF9F5),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -75,13 +78,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   title: "Read/Write",
                   suffixWidget: Text(""),
                 ),
-                children: <Widget>[...messageList],
+                children: <Widget>[...messageList.reversed],
                 footer: FlatMessageInputBox(
                   roundedCorners: true,
                   controller: _writerController,
                   onPressed: () {
-                    print(_writerController.value.text);
-
                     messageList.add(FlatChatMessage(
                       message: _writerController.value.text,
                       messageType: MessageType.sent,
@@ -108,6 +109,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               );
             }
+            return Container();
           }),
     );
   }

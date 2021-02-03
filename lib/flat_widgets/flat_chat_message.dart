@@ -43,7 +43,7 @@ class FlatChatMessage extends StatelessWidget {
     if (messageType == null || messageType == MessageType.received) {
       return Theme.of(context).primaryColor;
     } else {
-      return Theme.of(context).primaryColorDark.withOpacity(0.1);
+      return Color(0xff5B428F);
     }
   }
 
@@ -51,7 +51,7 @@ class FlatChatMessage extends StatelessWidget {
     if (messageType == null || messageType == MessageType.received) {
       return Colors.white;
     } else {
-      return Theme.of(context).primaryColorDark;
+      return Colors.white;
     }
   }
 
