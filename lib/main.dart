@@ -4,13 +4,9 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_ble_app/flat_widgets/flat_action_btn.dart';
-import 'package:flutter_ble_app/flat_widgets/flat_chat_message.dart';
-import 'package:flutter_ble_app/flat_widgets/flat_message_input_box.dart';
-import 'package:flutter_ble_app/flat_widgets/flat_page_header.dart';
-import 'package:flutter_ble_app/flat_widgets/flat_page_wrapper.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_ble_app/widgets.dart';
+import 'package:flutter_ble_app/chat_screen.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -238,9 +234,15 @@ class FindDevicesScreen extends StatelessWidget {
   }
 }
 
+
 class DeviceScreen extends StatefulWidget {
   final BluetoothDevice device;
   const DeviceScreen(this.device);
+  static const String CHARACTERISTIC_UUID =
+      "be39a5dc-048b-4b8f-84cb-94c197edd26e";
+  // "00002a37-0000-1000-8000-00805f9b34fb";
+  // "013dc1df-9b8c-4b5c-949b-262543eba78a";
+  
 
   @override
   _DeviceScreenState createState() => _DeviceScreenState(device);
@@ -248,20 +250,14 @@ class DeviceScreen extends StatefulWidget {
 
 class _DeviceScreenState extends State<DeviceScreen> {
   BluetoothDevice device;
+
   _DeviceScreenState(this.device); //constructor
 
-  static const String CHARACTERISTIC_UUID =
-      "be39a5dc-048b-4b8f-84cb-94c197edd26e";
-  // "00002a37-0000-1000-8000-00805f9b34fb";
-  // "013dc1df-9b8c-4b5c-949b-262543eba78a";
   static const String WRITECHARACTERISTIC_UUID =
       "013dc1df-9b8c-4b5c-949b-262543eba78a";
   // "0000aab0-0000-1000-8000-aabbccddeeff";
   static List<double> baseData = [0, 0];
-  static List<double> dataSetA = <double>[];
-  static List<double> dataSetB = <double>[];
   static Set<List<String>> _saved = Set<List<String>>(); // Add this line.
-  static bool switchDataSet = false;
   final int sizeOfArray = 10;
   static String tempValue;
   static String typeM;
@@ -297,7 +293,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
           Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => _pushChat(context),
+              // onTap: () => Navigator.of(context).push(
+              //     MaterialPageRoute(builder: (context) => ChatScreen(device))),
+
+              onTap: () => _setChat(),
               child: Icon(
                 Icons.message,
                 size: 40,
@@ -326,7 +325,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
     services.forEach((service) {
       service.characteristics.forEach((character) {
-        if (character.uuid.toString() == CHARACTERISTIC_UUID) {
+        if (character.uuid.toString() == DeviceScreen.CHARACTERISTIC_UUID) {
           character.setNotifyValue(!character.isNotifying);
           stream = character.value;
         }
@@ -383,6 +382,15 @@ class _DeviceScreenState extends State<DeviceScreen> {
                       RaisedButton(
                         onPressed: () => _writeChar(services),
                         child: Text("Write Characteristic"),
+                        color: Colors.deepPurple,
+                        padding: EdgeInsets.all(10),
+                      ),
+                      RaisedButton(
+                        onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ChatScreen(device, services))),
+                        child: Text("Chat View"),
                         color: Colors.deepPurple,
                         padding: EdgeInsets.all(10),
                       ),
@@ -547,7 +555,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
             if (typeM != "O")
               FloatingActionButton(
                 child: Icon(Icons.cloud_upload),
-                onPressed: () => postData("1",
+                onPressed: () => _postData("1",
                     tempValue.replaceAll(new RegExp('[^0-9.]'), ''), context),
               ),
           ],
@@ -556,7 +564,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
     );
   }
 
-  void postData(String sensorType, String value, BuildContext context) async {
+  void _postData(String sensorType, String value, BuildContext context) async {
     final http.Response response = await http
         .post(
           'http://sensor-dashboards.herokuapp.com/api/add-data/',
@@ -609,64 +617,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
       typeM = parameter;
       if (parameter.isNotEmpty) baseData = [];
     });
-  }
-
-  void _pushChat(BuildContext context) {
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (BuildContext context) {
-      return Scaffold(
-        body: FlatPageWrapper(
-          scrollType: ScrollType.floatingHeader,
-          reverseBodyList: true,
-          header: FlatPageHeader(
-            prefixWidget: FlatActionButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            title: "Read/Write",
-            suffixWidget: Text(""),
-          ),
-          children: [
-            FlatChatMessage(
-              message: "Typing another message from the input box.",
-              messageType: MessageType.sent,
-              showTime: true,
-              time: "2 mins ago",
-            ),
-            FlatChatMessage(
-              message: "Meet me tomorrow at the coffee shop.",
-              showTime: true,
-              time: "2 mins ago",
-            ),
-            FlatChatMessage(
-              message:
-                  "Flat Social UI kit is going really well. Hope this finishes soon.",
-              showTime: true,
-              time: "2 mins ago",
-            ),
-          ],
-          footer: FlatMessageInputBox(
-            roundedCorners: true,
-            controller: _writeController,
-            onPressed: () {
-              print(_writeController.value.text);
-              // services.forEach((service) {
-              //   service.characteristics.forEach((character) {
-              //     if (character.uuid.toString() == CHARACTERISTIC_UUID) {
-              //       if (character.properties.write) {
-              //         character
-              //             .write(utf8.encode(_writeController.value.text));
-              //         Navigator.pop(context);
-              //       }
-              //     }
-              //   });
-              // });
-            },
-          ),
-        ),
-      );
-    }));
   }
 
   void _pushSaved(BuildContext context) {
@@ -773,7 +723,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
     } else {
       _getValue(data, typeM);
     }
-  }
+  } 
 
   void addStringToSF(String sfString) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -806,7 +756,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                   print("ok");
                   services.forEach((service) {
                     service.characteristics.forEach((character) {
-                      if (character.uuid.toString() == CHARACTERISTIC_UUID) {
+                      if (character.uuid.toString() == DeviceScreen.CHARACTERISTIC_UUID) {
                         if (character.properties.write) {
                           character
                               .write(utf8.encode(_writeController.value.text));

@@ -65,6 +65,7 @@ class _PageBodyWidget extends StatelessWidget {
         children: [
           Positioned(
             child: ScrollConfiguration(
+              behavior: ScrollBehavior(),
               child: ListView(
                 reverse: reverseBodyList ?? false,
                 padding: EdgeInsets.only(
