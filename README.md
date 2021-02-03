@@ -5,8 +5,8 @@ Simple Flutter App that allows you to monitor changes in temperature, humidity, 
 ![](preview/devices.png)|![](preview/chart.png)
 # Now all the data can be saved to CSV file 
 ![](preview/raw_message.png)|![](preview/saved_data.png)
-# Remote writing to characteristic (light bulb icon)
-![](preview/send_data.png)
+# Remote writing to characteristic (light bulb icon) (also as a chat experimentally)
+![](preview/send_data.png)|![](preview/chat.png)
 
 ## Current preview (dark theme)
 

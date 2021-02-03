@@ -11,7 +11,6 @@ import 'package:flutter_ble_app/flat_widgets/flat_page_wrapper.dart';
 import 'package:flutter_ble_app/device_screen.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
-
 class ChatScreen extends StatefulWidget {
   final BluetoothDevice device;
   final List<BluetoothService> services;
@@ -28,19 +27,6 @@ class _ChatScreenState extends State<ChatScreen> {
   List<FlatChatMessage> messageList = [];
   TextEditingController _writerController = TextEditingController();
   Stream<List<int>> stream;
-
-  String _dataParser(List<int> dataFromDevice) {
-    return utf8.decode(dataFromDevice);
-  }
-
-  void _addNewMessage(String message) {
-    messageList.add(FlatChatMessage(
-      message: message,
-      messageType: MessageType.received,
-      showTime: false,
-      time: "",
-    ));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,28 +69,26 @@ class _ChatScreenState extends State<ChatScreen> {
                   roundedCorners: true,
                   controller: _writerController,
                   onPressed: () {
-                    messageList.add(FlatChatMessage(
-                      message: _writerController.value.text,
-                      messageType: MessageType.sent,
-                      showTime: false,
-                      time: "",
-                    ));
+                    // setState(() {
+                      messageList.add(FlatChatMessage(
+                        message: _writerController.value.text,
+                        messageType: MessageType.sent,
+                        showTime: false,
+                        time: "",
+                      ));
+                    // });
+
                     services.forEach((service) {
                       service.characteristics.forEach((character) {
                         if (character.uuid.toString() ==
-                            DeviceScreen.CHARACTERISTIC_UUID)
-                          print(character.read());
+                            DeviceScreen
+                                .CHARACTERISTIC_UUID) if (character
+                            .properties.write) {
+                          character
+                              .write(utf8.encode(_writerController.value.text));
+                        }
                       });
                     });
-
-                    //       if (character.properties.write) {
-                    //         character
-                    //             .write(utf8.encode(_writeController.value.text));
-                    //         Navigator.pop(context);
-                    //       }
-                    //     }
-                    //   });
-                    // });
                   },
                 ),
               );
@@ -112,5 +96,18 @@ class _ChatScreenState extends State<ChatScreen> {
             return Container();
           }),
     );
+  }
+
+  String _dataParser(List<int> dataFromDevice) {
+    return utf8.decode(dataFromDevice);
+  }
+
+  void _addNewMessage(String message) {
+    messageList.add(FlatChatMessage(
+      message: message,
+      messageType: MessageType.received,
+      showTime: false,
+      time: "",
+    ));
   }
 }

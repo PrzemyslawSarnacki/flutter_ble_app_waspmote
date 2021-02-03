@@ -156,20 +156,25 @@ class _DeviceScreenState extends State<DeviceScreen> {
                           ),
                         ),
                       ),
-                      RaisedButton(
-                        onPressed: () => _writeChar(services),
-                        child: Text("Write Characteristic"),
-                        color: Colors.deepPurple,
-                        padding: EdgeInsets.all(10),
-                      ),
-                      RaisedButton(
-                        onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    ChatScreen(device, services))),
-                        child: Text("Chat View"),
-                        color: Colors.deepPurple,
-                        padding: EdgeInsets.all(10),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          RaisedButton(
+                            onPressed: () => _writeChar(services),
+                            child: Text("Write Characteristic"),
+                            color: Colors.purple,
+                            padding: EdgeInsets.all(10),
+                          ),
+                          RaisedButton(
+                            onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        ChatScreen(device, services))),
+                            child: Text("Chat View"),
+                            color: Colors.purple,
+                            padding: EdgeInsets.all(10),
+                          ),
+                        ],
                       ),
                     ],
                   ),
