@@ -4,6 +4,11 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ble_app/flat_widgets/flat_action_btn.dart';
+import 'package:flutter_ble_app/flat_widgets/flat_chat_message.dart';
+import 'package:flutter_ble_app/flat_widgets/flat_message_input_box.dart';
+import 'package:flutter_ble_app/flat_widgets/flat_page_header.dart';
+import 'package:flutter_ble_app/flat_widgets/flat_page_wrapper.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_ble_app/widgets.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
@@ -292,7 +297,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
           Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => _setChat(),
+              onTap: () => _pushChat(context),
               child: Icon(
                 Icons.message,
                 size: 40,
@@ -604,6 +609,64 @@ class _DeviceScreenState extends State<DeviceScreen> {
       typeM = parameter;
       if (parameter.isNotEmpty) baseData = [];
     });
+  }
+
+  void _pushChat(BuildContext context) {
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (BuildContext context) {
+      return Scaffold(
+        body: FlatPageWrapper(
+          scrollType: ScrollType.floatingHeader,
+          reverseBodyList: true,
+          header: FlatPageHeader(
+            prefixWidget: FlatActionButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            title: "Read/Write",
+            suffixWidget: Text(""),
+          ),
+          children: [
+            FlatChatMessage(
+              message: "Typing another message from the input box.",
+              messageType: MessageType.sent,
+              showTime: true,
+              time: "2 mins ago",
+            ),
+            FlatChatMessage(
+              message: "Meet me tomorrow at the coffee shop.",
+              showTime: true,
+              time: "2 mins ago",
+            ),
+            FlatChatMessage(
+              message:
+                  "Flat Social UI kit is going really well. Hope this finishes soon.",
+              showTime: true,
+              time: "2 mins ago",
+            ),
+          ],
+          footer: FlatMessageInputBox(
+            roundedCorners: true,
+            controller: _writeController,
+            onPressed: () {
+              print(_writeController.value.text);
+              // services.forEach((service) {
+              //   service.characteristics.forEach((character) {
+              //     if (character.uuid.toString() == CHARACTERISTIC_UUID) {
+              //       if (character.properties.write) {
+              //         character
+              //             .write(utf8.encode(_writeController.value.text));
+              //         Navigator.pop(context);
+              //       }
+              //     }
+              //   });
+              // });
+            },
+          ),
+        ),
+      );
+    }));
   }
 
   void _pushSaved(BuildContext context) {
