@@ -262,55 +262,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
   static String typeM;
 
   final _parserController = TextEditingController();
+  final _writeController = TextEditingController();
 
-  Widget _tickMeasurement(
-      BuildContext context, List<BluetoothService> services) {
-    final _writeController = TextEditingController();
-
-    void _writeChar() async {
-      await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text("Write"),
-              content: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      controller: _writeController,
-                    ),
-                  ),
-                ],
-              ),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text("Send"),
-                  onPressed: () {
-                    print("ok");
-                    services.forEach((service) {
-                      service.characteristics.forEach((character) {
-                        if (character.uuid.toString() == CHARACTERISTIC_UUID) {
-                          if (character.properties.write) {
-                            character.write(
-                                utf8.encode(_writeController.value.text));
-                            Navigator.pop(context);
-                          }
-                        }
-                      });
-                    });
-                  },
-                ),
-                FlatButton(
-                  child: Text("Cancel"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            );
-          });
-    }
-
+  Widget _tickMeasurement(BuildContext context) {
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -328,11 +282,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
             color: Colors.transparent,
             child: InkWell(
               onTap: () => _setPlot(_parserController.value.text),
-              child: Image.asset(
-                "images/humidity.png",
-                width: 40,
+              child: Icon(
+                Icons.show_chart,
+                size: 40,
                 color: Colors.white70,
-                fit: BoxFit.cover,
               ),
             ),
           ),
@@ -342,17 +295,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
               onTap: () => _setChat(),
               child: Icon(
                 Icons.message,
-                size: 40,
-                color: Colors.white70,
-              ),
-            ),
-          ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => _writeChar(),
-              child: Icon(
-                Icons.lightbulb_outline,
                 size: 40,
                 color: Colors.white70,
               ),
@@ -404,7 +346,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                 return Center(
                   child: Column(
                     children: <Widget>[
-                      _tickMeasurement(context, services),
+                      _tickMeasurement(context),
                       SizedBox(height: 50),
                       Text(
                         'Raw Message:',
@@ -433,6 +375,12 @@ class _DeviceScreenState extends State<DeviceScreen> {
                           ),
                         ),
                       ),
+                      RaisedButton(
+                        onPressed: () => _writeChar(services),
+                        child: Text("Write Characteristic"),
+                        color: Colors.deepPurple,
+                        padding: EdgeInsets.all(10),
+                      ),
                     ],
                   ),
                 );
@@ -441,7 +389,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      _tickMeasurement(context, services),
+                      _tickMeasurement(context),
                       SizedBox(height: 50),
                       new Container(
                         width: 300.0,
@@ -469,7 +417,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
               return Center(
                 child: Column(
                   children: <Widget>[
-                    _tickMeasurement(context, services),
+                    _tickMeasurement(context),
                     Text('Check the stream')
                   ],
                 ),
@@ -771,5 +719,49 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   String _dataParser(List<int> dataFromDevice) {
     return utf8.decode(dataFromDevice);
+  }
+
+  void _writeChar(List<BluetoothService> services) async {
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Write"),
+            content: Row(
+              children: <Widget>[
+                Expanded(
+                  child: TextField(
+                    controller: _writeController,
+                  ),
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Send"),
+                onPressed: () {
+                  print("ok");
+                  services.forEach((service) {
+                    service.characteristics.forEach((character) {
+                      if (character.uuid.toString() == CHARACTERISTIC_UUID) {
+                        if (character.properties.write) {
+                          character
+                              .write(utf8.encode(_writeController.value.text));
+                          Navigator.pop(context);
+                        }
+                      }
+                    });
+                  });
+                },
+              ),
+              FlatButton(
+                child: Text("Cancel"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        });
   }
 }
