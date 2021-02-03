@@ -35,14 +35,12 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _addNewMessage(String message) {
-    setState(() {
-      messageList.add(FlatChatMessage(
-        message: message,
-        messageType: MessageType.received,
-        showTime: false,
-        time: "",
-      ));
-    });
+    messageList.add(FlatChatMessage(
+      message: message,
+      messageType: MessageType.received,
+      showTime: false,
+      time: "",
+    ));
   }
 
   @override
@@ -57,66 +55,60 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     return Scaffold(
-      body: FlatPageWrapper(
-        scrollType: ScrollType.floatingHeader,
-        reverseBodyList: false,
-        header: FlatPageHeader(
-          prefixWidget: FlatActionButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          title: "Read/Write",
-          suffixWidget: Text(""),
-        ),
-        children: <Widget>[
-          StreamBuilder<List<int>>(
-              stream: stream,
-              builder:
-                  (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
-                if (snapshot.hasError) return Text('Error : ${snapshot.error}');
+      body: StreamBuilder<List<int>>(
+          stream: stream,
+          builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
+            if (snapshot.hasError) return Text('Error : ${snapshot.error}');
 
-                if (snapshot.connectionState == ConnectionState.active) {
-                  var currentValue = _dataParser(snapshot.data);
-                  _addNewMessage(currentValue);
-                  return Container(
-                      child: Column(
-                    children: [...messageList],
-                  ));
-                }
-              }),
-        ],
-        footer: FlatMessageInputBox(
-          roundedCorners: true,
-          controller: _writerController,
-          onPressed: () {
-            print(_writerController.value.text);
-            setState(() {
-              messageList.add(FlatChatMessage(
-                message: _writerController.value.text,
-                messageType: MessageType.sent,
-                showTime: false,
-                time: "",
-              ));
-            });
-            services.forEach((service) {
-              service.characteristics.forEach((character) {
-                if (character.uuid.toString() ==
-                    DeviceScreen.CHARACTERISTIC_UUID) print(character.read());
-              });
-            });
+            if (snapshot.connectionState == ConnectionState.active) {
+              var currentValue = _dataParser(snapshot.data);
+              _addNewMessage(currentValue);
+              return FlatPageWrapper(
+                scrollType: ScrollType.floatingHeader,
+                reverseBodyList: false,
+                header: FlatPageHeader(
+                  prefixWidget: FlatActionButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  title: "Read/Write",
+                  suffixWidget: Text(""),
+                ),
+                children: <Widget>[...messageList],
+                footer: FlatMessageInputBox(
+                  roundedCorners: true,
+                  controller: _writerController,
+                  onPressed: () {
+                    print(_writerController.value.text);
 
-            //       if (character.properties.write) {
-            //         character
-            //             .write(utf8.encode(_writeController.value.text));
-            //         Navigator.pop(context);
-            //       }
-            //     }
-            //   });
-            // });
-          },
-        ),
-      ),
+                    messageList.add(FlatChatMessage(
+                      message: _writerController.value.text,
+                      messageType: MessageType.sent,
+                      showTime: false,
+                      time: "",
+                    ));
+                    services.forEach((service) {
+                      service.characteristics.forEach((character) {
+                        if (character.uuid.toString() ==
+                            DeviceScreen.CHARACTERISTIC_UUID)
+                          print(character.read());
+                      });
+                    });
+
+                    //       if (character.properties.write) {
+                    //         character
+                    //             .write(utf8.encode(_writeController.value.text));
+                    //         Navigator.pop(context);
+                    //       }
+                    //     }
+                    //   });
+                    // });
+                  },
+                ),
+              );
+            }
+          }),
     );
   }
 }
